@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.titan.foodrecipes.R;
 import com.titan.foodrecipes.models.Recipe;
 
@@ -31,6 +33,14 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+
+        // set the image
+        RequestOptions options = new RequestOptions().centerCrop().error(R.drawable.ic_launcher_background);
+
+        Glide.with(((RecipeViewHolder) holder).itemView)
+                .setDefaultRequestOptions(options)
+                .load(mRecipes.get(position).getImage_url())
+                .into(((RecipeViewHolder) holder).image);
 
         ((RecipeViewHolder)holder).title.setText(mRecipes.get(position).getTitle());
         ((RecipeViewHolder)holder).publisher.setText(mRecipes.get(position).getPublisher());
