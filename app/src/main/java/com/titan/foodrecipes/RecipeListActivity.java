@@ -1,6 +1,7 @@
 package com.titan.foodrecipes;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -35,7 +36,7 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
 
         initRecyclerView();
         subscribeObservers();
-        testRetrofitRequest();
+        initSearchView();
     }
 
     private void subscribeObservers(){
@@ -54,9 +55,30 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
     }
 
     private void initRecyclerView(){
+
         mAdapter = new RecipeRecyclerAdapter(this);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mAdapter);
+    }
+
+    private void initSearchView(){
+
+        final SearchView searchView = findViewById(R.id.search_view);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+
+                mRecipeListViewModel.searchRecipesApi(query, 1);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
     }
 
 
@@ -77,7 +99,4 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
 
 
 
-    private void testRetrofitRequest(){
-        mRecipeListViewModel.searchRecipesApi("chicken", 1);
-    }
 }
