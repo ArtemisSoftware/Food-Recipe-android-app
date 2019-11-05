@@ -19,8 +19,7 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private List<Recipe> mRecipes;
     private OnRecipeListener mOnRecipeListener;
 
-    public RecipeRecyclerAdapter(List<Recipe> mRecipes, OnRecipeListener mOnRecipeListener) {
-        this.mRecipes = mRecipes;
+    public RecipeRecyclerAdapter(OnRecipeListener mOnRecipeListener) {
         this.mOnRecipeListener = mOnRecipeListener;
     }
 
@@ -37,7 +36,7 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         // set the image
         RequestOptions options = new RequestOptions().centerCrop().error(R.drawable.ic_launcher_background);
 
-        Glide.with(((RecipeViewHolder) holder).itemView)
+        Glide.with(((RecipeViewHolder) holder).itemView.getContext())
                 .setDefaultRequestOptions(options)
                 .load(mRecipes.get(position).getImage_url())
                 .into(((RecipeViewHolder) holder).image);
@@ -49,7 +48,12 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     @Override
     public int getItemCount() {
-        return mRecipes.size();
+
+        if(mRecipes != null) {
+            return mRecipes.size();
+        }
+
+        return 0;
     }
 
     public void setRecipes(List<Recipe> recipes){

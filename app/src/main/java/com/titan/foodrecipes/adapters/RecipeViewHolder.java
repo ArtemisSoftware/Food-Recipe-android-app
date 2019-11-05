@@ -1,6 +1,7 @@
 package com.titan.foodrecipes.adapters;
 
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,7 +13,7 @@ import com.titan.foodrecipes.R;
 public class RecipeViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
     TextView title, publisher, socialScore;
-    AppCompatImageView image;
+    ImageView image;
     OnRecipeListener onRecipeListener;
 
     public RecipeViewHolder(@NonNull View itemView, OnRecipeListener onRecipeListener) {

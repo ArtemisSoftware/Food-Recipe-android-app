@@ -1,36 +1,41 @@
 package com.titan.foodrecipes;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 
+import com.titan.foodrecipes.adapters.OnRecipeListener;
+import com.titan.foodrecipes.adapters.RecipeRecyclerAdapter;
 import com.titan.foodrecipes.models.Recipe;
 import com.titan.foodrecipes.util.Testing;
 import com.titan.foodrecipes.viewmodels.RecipeListViewModel;
 
 import java.util.List;
 
-public class RecipeListActivity extends BaseActivity {
+public class RecipeListActivity extends BaseActivity implements OnRecipeListener {
 
     private static final String TAG = "RecipeListActivity";
     
     private RecipeListViewModel mRecipeListViewModel;
+    private RecyclerView mRecyclerView;
+    private RecipeRecyclerAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_list);
 
+        mRecyclerView = findViewById(R.id.recipe_list);
+
         mRecipeListViewModel = ViewModelProviders.of(this).get(RecipeListViewModel.class);
 
-        findViewById(R.id.test).setOnClickListener(testRetrofitRequest);
-
+        initRecyclerView();
         subscribeObservers();
+        testRetrofitRequest();
     }
 
     private void subscribeObservers(){
@@ -42,9 +47,16 @@ public class RecipeListActivity extends BaseActivity {
                 if(recipes != null) {
 
                     Testing.printRecipes("recipes test", recipes);
+                    mAdapter.setRecipes(recipes);
                 }
             }
         });
+    }
+
+    private void initRecyclerView(){
+        mAdapter = new RecipeRecyclerAdapter(this);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(mAdapter);
     }
 
 
@@ -53,11 +65,19 @@ public class RecipeListActivity extends BaseActivity {
     }
 
 
-    View.OnClickListener testRetrofitRequest = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            searchRecipesApi("Chicken breast", 1);
-        }
-    };
+    @Override
+    public void onRecipeClick(int position) {
 
+    }
+
+    @Override
+    public void onCategoryClick(String category) {
+
+    }
+
+
+
+    private void testRetrofitRequest(){
+        mRecipeListViewModel.searchRecipesApi("chicken", 1);
+    }
 }
