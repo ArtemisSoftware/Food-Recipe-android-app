@@ -6,15 +6,19 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import com.titan.foodrecipes.models.Recipe;
+import com.titan.foodrecipes.util.Testing;
 import com.titan.foodrecipes.viewmodels.RecipeListViewModel;
 
 import java.util.List;
 
 public class RecipeListActivity extends BaseActivity {
 
+    private static final String TAG = "RecipeListActivity";
+    
     private RecipeListViewModel mRecipeListViewModel;
 
     @Override
@@ -24,12 +28,9 @@ public class RecipeListActivity extends BaseActivity {
 
         mRecipeListViewModel = ViewModelProviders.of(this).get(RecipeListViewModel.class);
 
-        findViewById(R.id.test).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        findViewById(R.id.test).setOnClickListener(testRetrofitRequest);
 
-            }
-        });
+        subscribeObservers();
     }
 
     private void subscribeObservers(){
@@ -38,7 +39,25 @@ public class RecipeListActivity extends BaseActivity {
             @Override
             public void onChanged(@Nullable List<Recipe> recipes) {
 
+                if(recipes != null) {
+
+                    Testing.printRecipes("recipes test", recipes);
+                }
             }
         });
     }
+
+
+    private void searchRecipesApi(String query, int pageNumber){
+        mRecipeListViewModel.searchRecipesApi(query, pageNumber);
+    }
+
+
+    View.OnClickListener testRetrofitRequest = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            searchRecipesApi("Chicken breast", 1);
+        }
+    };
+
 }
