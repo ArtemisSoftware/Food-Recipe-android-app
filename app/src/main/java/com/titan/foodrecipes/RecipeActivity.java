@@ -28,6 +28,7 @@ public class RecipeActivity extends BaseActivity {
         mRecipeIngredientsContainer = findViewById(R.id.ingredients_container);
         mScrollView = findViewById(R.id.parent);
 
+        getIncomingIntent();
     }
 
     private void getIncomingIntent(){
