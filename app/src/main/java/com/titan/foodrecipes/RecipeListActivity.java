@@ -13,6 +13,7 @@ import com.titan.foodrecipes.adapters.OnRecipeListener;
 import com.titan.foodrecipes.adapters.RecipeRecyclerAdapter;
 import com.titan.foodrecipes.models.Recipe;
 import com.titan.foodrecipes.util.Testing;
+import com.titan.foodrecipes.util.VerticalSpacingItemDecorator;
 import com.titan.foodrecipes.viewmodels.RecipeListViewModel;
 
 import java.util.List;
@@ -39,7 +40,7 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
         initSearchView();
 
         if(!mRecipeListViewModel.isIsViewingRecipes()){
-            displaySearchCatetegories();
+            displaySearchCategories();
         }
     }
 
@@ -61,6 +62,8 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
     private void initRecyclerView(){
 
         mAdapter = new RecipeRecyclerAdapter(this);
+        VerticalSpacingItemDecorator itemDecorator = new VerticalSpacingItemDecorator(8);
+        mRecyclerView.addItemDecoration(itemDecorator);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mAdapter);
     }
@@ -103,7 +106,7 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
     }
 
 
-    private void displaySearchCatetegories(){
+    private void displaySearchCategories(){
         mRecipeListViewModel.setIsViewingRecipes(false);
         mAdapter.displaySearchCategories();
     }
