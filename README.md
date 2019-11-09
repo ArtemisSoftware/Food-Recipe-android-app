@@ -1,7 +1,7 @@
 # Food-Recipe-android-app
 Food recipe app 
 
-Android app that communicates with food2fork rest api in order to retrieve information display it in various view types.
+Android app that communicates with food2fork rest api in order to retrieve information and display it in various view types.
 
 
 In order to create this app the following was used/ implemented:
