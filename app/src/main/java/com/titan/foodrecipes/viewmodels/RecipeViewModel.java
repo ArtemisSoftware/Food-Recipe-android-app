@@ -9,6 +9,7 @@ import com.titan.foodrecipes.repository.RecipeRepository;
 public class RecipeViewModel extends ViewModel {
 
     private RecipeRepository mRecipeRepository;
+    private String mRecipeId;
 
     public RecipeViewModel() {
         this.mRecipeRepository = RecipeRepository.getInstance();
@@ -19,6 +20,11 @@ public class RecipeViewModel extends ViewModel {
     }
 
     public void searchRecipeById(String recipeId){
+        mRecipeId = recipeId;
         mRecipeRepository.searchRecipeById(recipeId);
+    }
+
+    public String getRecipeId() {
+        return mRecipeId;
     }
 }
