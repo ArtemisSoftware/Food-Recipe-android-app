@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -67,6 +68,13 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
                         mAdapter.setRecipes(recipes);
                     }
                 }
+            }
+        });
+
+        mRecipeListViewModel.isQueryExhausted().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                if(aBoolean) Log.d(TAG, "onChange: the query is exhausted...");
             }
         });
     }
