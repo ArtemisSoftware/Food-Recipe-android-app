@@ -1,6 +1,7 @@
 package com.titan.foodrecipes;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -19,6 +20,8 @@ import com.titan.foodrecipes.viewmodels.RecipeViewModel;
 
 public class RecipeActivity extends BaseActivity {
 
+    private static final String TAG = "RecipeActivity";
+    
     private AppCompatImageView mRecipeImage;
     private TextView mRecipeTitle, mRecipeRank;
     private LinearLayout mRecipeIngredientsContainer;
@@ -62,7 +65,17 @@ public class RecipeActivity extends BaseActivity {
 
                     if(recipe.getRecipe_id().equals(mRecipeViewModel.getRecipeId())){
                         setRecipeProperties(recipe);
+                        mRecipeViewModel.setRetrievedRecipe(true);
                     }
+                }
+            }
+        });
+
+        mRecipeViewModel.isRecipeRequestTimedOut().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                if(aBoolean && !mRecipeViewModel.didRetrieveRecipe()){
+                    Log.d(TAG, "onChanged: timed out");
 
                 }
             }
