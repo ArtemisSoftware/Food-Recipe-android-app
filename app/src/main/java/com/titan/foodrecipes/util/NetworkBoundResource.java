@@ -6,7 +6,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.Observer;
 
+import com.titan.foodrecipes.AppExecutors;
 import com.titan.foodrecipes.requests.responses.ApiResponse;
 
 /**
@@ -16,7 +18,50 @@ import com.titan.foodrecipes.requests.responses.ApiResponse;
  */
 public abstract class NetworkBoundResource<CacheObject, RequestObject> {
 
+    private AppExecutors appExecutors;
     private MediatorLiveData<Resource<CacheObject>> results = new MediatorLiveData<>();
+
+
+    public NetworkBoundResource(AppExecutors appExecutors) {
+        this.appExecutors = appExecutors;
+    }
+
+    private void init(){
+
+        //update livedata for loading status
+        results.setValue((Resource<CacheObject>) Resource.loading(null));
+
+        // observer livedata source from local db
+        final LiveData<CacheObject> dbSource = loadFromDb();
+
+        results.addSource(dbSource, new Observer<CacheObject>() {
+            @Override
+            public void onChanged(CacheObject cacheObject) {
+
+                results.removeSource(dbSource);
+
+                if(shouldFetch(cacheObject)){
+                    //get data from the network
+
+
+                }
+                else{
+                    results.addSource(dbSource, new Observer<CacheObject>() {
+                        @Override
+                        public void onChanged(CacheObject cacheObject) {
+                            setValue(Resource.success(cacheObject));
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void setValue(Resource<CacheObject> newValue){
+        if(results.getValue() != newValue){
+            results.setValue(newValue);
+        }
+    }
 
 
     /**
