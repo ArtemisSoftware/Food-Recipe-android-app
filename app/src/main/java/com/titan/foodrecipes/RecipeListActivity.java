@@ -31,7 +31,7 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
     private RecipeListViewModel mRecipeListViewModel;
     private RecyclerView mRecyclerView;
     private RecipeRecyclerAdapter mAdapter;
-    private SearchView mSerchView;
+    private SearchView mSearchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,92 +39,67 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
         setContentView(R.layout.activity_recipe_list);
 
         mRecyclerView = findViewById(R.id.recipe_list);
-        mSerchView = findViewById(R.id.search_view);
+        mSearchView = findViewById(R.id.search_view);
 
         mRecipeListViewModel = ViewModelProviders.of(this).get(RecipeListViewModel.class);
 
         initRecyclerView();
         subscribeObservers();
         initSearchView();
-
-        if(!mRecipeListViewModel.isIsViewingRecipes()){
-            displaySearchCategories();
-        }
-
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+
+        subscribeObservers();
     }
 
     private void subscribeObservers(){
 
-        mRecipeListViewModel.getRecipes().observe(this, new Observer<List<Recipe>>() {
+        mRecipeListViewModel.getViewState().observe(this, new Observer<RecipeListViewModel.ViewState>() {
             @Override
-            public void onChanged(@Nullable List<Recipe> recipes) {
+            public void onChanged(RecipeListViewModel.ViewState viewState) {
 
-                if(recipes != null) {
-                    if(mRecipeListViewModel.isIsViewingRecipes()) {
+                if(viewState != null){
 
-                        Testing.printRecipes("recipes test", recipes);
-                        mRecipeListViewModel.setIsPerformingQuery(false);
-                        mAdapter.setRecipes(recipes);
+                    switch (viewState){
+
+                        case RECIPES:{
+
+                            break;
+                        }
+
+                        case CATEGORIES:{
+
+                            displaySearchCategories();
+                            break;
+                        }
                     }
-                }
-            }
-        });
-
-        mRecipeListViewModel.isQueryExhausted().observe(this, new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean aBoolean) {
-                if(aBoolean){
-                    mAdapter.setQueryExhausted();
                 }
             }
         });
     }
 
     private void initRecyclerView(){
-
         mAdapter = new RecipeRecyclerAdapter(this);
-        VerticalSpacingItemDecorator itemDecorator = new VerticalSpacingItemDecorator(8);
+        VerticalSpacingItemDecorator itemDecorator = new VerticalSpacingItemDecorator(6);
         mRecyclerView.addItemDecoration(itemDecorator);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mAdapter);
-
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-
-
-                if(!mRecyclerView.canScrollVertically(1)){
-                    mRecipeListViewModel.searchNextPage();
-                }
-            }
-        });
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     private void initSearchView(){
-
-        mSerchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextSubmit(String query) {
+            public boolean onQueryTextSubmit(String s) {
 
-                mAdapter.displayLoading();
-                mRecipeListViewModel.searchRecipesApi(query, 1);
-                mSerchView.clearFocus();
+
                 return false;
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
+            public boolean onQueryTextChange(String s) {
                 return false;
             }
         });
     }
-
-
-    private void searchRecipesApi(String query, int pageNumber){
-        mRecipeListViewModel.searchRecipesApi(query, pageNumber);
-    }
-
 
     @Override
     public void onRecipeClick(int position) {
@@ -135,40 +110,10 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
 
     @Override
     public void onCategoryClick(String category) {
-        mAdapter.displayLoading();
-        mRecipeListViewModel.searchRecipesApi(category, 1);
-        mSerchView.clearFocus();
-    }
 
+    }
 
     private void displaySearchCategories(){
-        mRecipeListViewModel.setIsViewingRecipes(false);
         mAdapter.displaySearchCategories();
-    }
-
-    @Override
-    public void onBackPressed() {
-
-        if(mRecipeListViewModel.onBackPressed()){
-            super.onBackPressed();
-        }
-        else {
-            displaySearchCategories();
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.recipe_search_menu, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
-        if(item.getItemId() == R.id.action_categories){
-            displaySearchCategories();
-        }
-        return super.onOptionsItemSelected(item);
     }
 }

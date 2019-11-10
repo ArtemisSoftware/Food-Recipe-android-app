@@ -1,5 +1,9 @@
 package com.titan.foodrecipes.viewmodels;
 
+import android.app.Application;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -9,63 +13,28 @@ import com.titan.foodrecipes.repository.RecipeRepository;
 
 import java.util.List;
 
-public class RecipeListViewModel extends ViewModel {
+public class RecipeListViewModel extends AndroidViewModel {
 
-    private RecipeRepository mRecipeRepository;
+    private static final String TAG = "RecipeListViewModel";
 
-    private boolean mIsViewingRecipes;
-    private boolean mIsPerformingQuery;
+    public enum ViewState {CATEGORIES, RECIPES}
 
-    public RecipeListViewModel() {
-        mIsViewingRecipes = false;
-        mIsPerformingQuery = false;
-        mRecipeRepository = RecipeRepository.getInstance();
+    private MutableLiveData<ViewState> viewState;
+
+    public RecipeListViewModel(@NonNull Application application) {
+        super(application);
+
+        init();
     }
 
-    public LiveData<List<Recipe>> getRecipes(){
-        return mRecipeRepository.getRecipes();
-    }
-
-    public LiveData<Boolean> isQueryExhausted(){
-        return mRecipeRepository.getmIsQueryExhausted();
-    }
-
-    public void searchRecipesApi(String query, int pageNumber){
-        mIsViewingRecipes = true;
-        mIsPerformingQuery = true;
-        mRecipeRepository.searchRecipesApi(query, pageNumber);
-    }
-
-    public void searchNextPage(){
-        if(!mIsPerformingQuery && mIsViewingRecipes && !isQueryExhausted().getValue()){
-            mRecipeRepository.searchNextPage();
+    private void init(){
+        if(viewState == null){
+            viewState = new MutableLiveData<>();
+            viewState.setValue(ViewState.CATEGORIES);
         }
     }
 
-    public boolean isIsViewingRecipes() {
-        return mIsViewingRecipes;
-    }
-
-    public void setIsViewingRecipes(boolean mIsViewingRecipes) {
-        this.mIsViewingRecipes = mIsViewingRecipes;
-    }
-
-    public boolean onBackPressed(){
-        if(mIsPerformingQuery){
-           mRecipeRepository.cancelRequest();
-        }
-        if(mIsViewingRecipes){
-            mIsViewingRecipes = false;
-            return false;
-        }
-        return true;
-    }
-
-    public boolean isIsPerformingQuery() {
-        return mIsPerformingQuery;
-    }
-
-    public void setIsPerformingQuery(boolean mIsPerformingQuery) {
-        this.mIsPerformingQuery = mIsPerformingQuery;
+    public LiveData<ViewState> getViewState() {
+        return viewState;
     }
 }
