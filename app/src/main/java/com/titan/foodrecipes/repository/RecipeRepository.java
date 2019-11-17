@@ -1,6 +1,7 @@
 package com.titan.foodrecipes.repository;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,6 +26,8 @@ import java.util.List;
 
 public class RecipeRepository {
 
+    private static final String TAG = "RecipeRepository";
+    
     private static RecipeRepository instance;
     private RecipeDao recipeDao;
 
@@ -53,6 +56,30 @@ public class RecipeRepository {
             @Override
             protected void saveCallResult(@NonNull RecipeSearchResponse item) {
 
+                if(item.getRecipes() != null){ //recipe list will be null if the api key is expired
+
+                    Recipe [] recipes = new Recipe[item.getRecipes().size()];
+
+                    int index = 0;
+                    for(long rowid: recipeDao.insertRecipes((Recipe []) (item.getRecipes().toArray(recipes)))){
+
+                        if(rowid == -1){
+                            Log.d(TAG, "saveCallResult: CONFLICT... This recipe is already in the cache");
+
+                            //if the recipe already exists... I dont want to set the ingredients or timestamp b/c (because)
+                            //they will be erased
+
+                            recipeDao.updateRecipe(
+                                    recipes[index].getRecipe_id(),
+                                    recipes[index].getTitle(),
+                                    recipes[index].getPublisher(),
+                                    recipes[index].getImage_url(),
+                                    recipes[index].getSocial_rank()
+                            );
+                        }
+                        index++;
+                    }
+                }
             }
 
             @Override
