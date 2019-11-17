@@ -59,6 +59,7 @@ public class RecipeApiClient {
 
     public void searchRecipesApi(String query, int pageNumber){
 
+        /*
         if(mRetrieveRecipesRunnable != null){
             mRetrieveRecipesRunnable = null;
         }
@@ -74,11 +75,13 @@ public class RecipeApiClient {
                 handler.cancel(true);
             }
         }, Constants.NETWORK_TIMEOUT, TimeUnit.MILLISECONDS);
+        */
     }
 
 
     public void searchRecipeById(String recipeId){
 
+        /*
         if(mRetrieveRecipeRunnable != null){
             mRetrieveRecipeRunnable = null;
         }
@@ -95,6 +98,7 @@ public class RecipeApiClient {
                 handler.cancel(true);
             }
         }, Constants.NETWORK_TIMEOUT, TimeUnit.MILLISECONDS);
+        */
     }
 
 
@@ -144,7 +148,7 @@ public class RecipeApiClient {
         }
 
         private Call<RecipeSearchResponse> getRecipes(String query, int pageNumber){
-            return ServiceGenerator.getRecipeApi().searchRecipe(Constants.API_KEY, query, String.valueOf(pageNumber));
+            return null;//ServiceGenerator.getRecipeApi().searchRecipe(Constants.API_KEY, query, String.valueOf(pageNumber));
         }
 
         private void cancelRequest(){
@@ -191,7 +195,7 @@ public class RecipeApiClient {
         }
 
         private Call<RecipeResponse> getRecipe(String recipeId){
-            return ServiceGenerator.getRecipeApi().getRecipe(Constants.API_KEY, recipeId);
+            return null;//ServiceGenerator.getRecipeApi().getRecipe(Constants.API_KEY, recipeId);
         }
 
         private void cancelRequest(){
