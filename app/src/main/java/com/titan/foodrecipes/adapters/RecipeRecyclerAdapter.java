@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.RequestOptions;
 import com.titan.foodrecipes.R;
 import com.titan.foodrecipes.models.Recipe;
@@ -26,9 +27,11 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     private List<Recipe> mRecipes;
     private OnRecipeListener mOnRecipeListener;
+    private RequestManager requestManager;
 
-    public RecipeRecyclerAdapter(OnRecipeListener mOnRecipeListener) {
+    public RecipeRecyclerAdapter(OnRecipeListener mOnRecipeListener, RequestManager requestManager) {
         this.mOnRecipeListener = mOnRecipeListener;
+        this.requestManager = requestManager;
     }
 
     @NonNull
@@ -46,7 +49,7 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             case CATEGORY_TYPE:{
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_category_list_item, parent, false);
-                return new CategoryViewHolder(view, mOnRecipeListener);
+                return new CategoryViewHolder(view, mOnRecipeListener, requestManager);
             }
 
             case EXHAUSTED_TYPE:{
@@ -56,7 +59,7 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             default:{
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_recipe_list_item, parent, false);
-                return new RecipeViewHolder(view, mOnRecipeListener);
+                return new RecipeViewHolder(view, mOnRecipeListener, requestManager);
             }
         }
 
@@ -70,31 +73,13 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         if(itemViewType == RECIPE_TYPE) {
 
-            // set the image
-            RequestOptions options = new RequestOptions().centerCrop().error(R.drawable.ic_launcher_background);
-
-            Glide.with(((RecipeViewHolder) holder).itemView.getContext())
-                    .setDefaultRequestOptions(options)
-                    .load(mRecipes.get(position).getImage_url())
-                    .into(((RecipeViewHolder) holder).image);
-
-            ((RecipeViewHolder) holder).title.setText(mRecipes.get(position).getTitle());
-            ((RecipeViewHolder) holder).publisher.setText(mRecipes.get(position).getPublisher());
-            ((RecipeViewHolder) holder).socialScore.setText(String.valueOf(Math.round(mRecipes.get(position).getSocial_rank())));
+            ((RecipeViewHolder) holder).onBind(mRecipes.get(position));
         }
         else if(itemViewType == CATEGORY_TYPE) {
 
             // set the image
-            RequestOptions options = new RequestOptions().centerCrop().error(R.drawable.ic_launcher_background);
 
-            Uri path = Uri.parse("android.resource://com.titan.foodrecipes/drawable/" + mRecipes.get(position).getImage_url());
-
-            Glide.with(((CategoryViewHolder) holder).itemView.getContext())
-                    .setDefaultRequestOptions(options)
-                    .load(path)
-                    .into(((CategoryViewHolder) holder).categoryImage);
-
-            ((CategoryViewHolder) holder).categoryTitle.setText(mRecipes.get(position).getTitle());
+            ((CategoryViewHolder) holder).onBind(mRecipes.get(position));
         }
     }
 
@@ -119,7 +104,7 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public void displayOnlyLoading(){
         clearRecipesList();
         Recipe recipe = new Recipe();
-        recipe.setTitle("LOADING");
+        recipe.setTitle("LOADING...");
         mRecipes.add(recipe);
         notifyDataSetChanged();
     }

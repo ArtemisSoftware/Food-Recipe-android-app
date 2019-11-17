@@ -16,6 +16,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.request.RequestOptions;
 import com.titan.foodrecipes.adapters.OnRecipeListener;
 import com.titan.foodrecipes.adapters.RecipeRecyclerAdapter;
 import com.titan.foodrecipes.models.Recipe;
@@ -132,6 +135,15 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
         });
     }
 
+    private RequestManager initGlide(){
+
+        RequestOptions options = new RequestOptions()
+                .placeholder(R.drawable.white_background)
+                .error(R.drawable.white_background);
+
+        return Glide.with(this).setDefaultRequestOptions(options);
+    }
+
     private void searchRecipesApi(String query){
 
         Timber.d("Search recipes: %s", query);
@@ -139,7 +151,7 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
     }
 
     private void initRecyclerView(){
-        mAdapter = new RecipeRecyclerAdapter(this);
+        mAdapter = new RecipeRecyclerAdapter(this,initGlide());
         VerticalSpacingItemDecorator itemDecorator = new VerticalSpacingItemDecorator(6);
         mRecyclerView.addItemDecoration(itemDecorator);
         mRecyclerView.setAdapter(mAdapter);
