@@ -13,6 +13,8 @@ import androidx.lifecycle.Observer;
 import com.titan.foodrecipes.AppExecutors;
 import com.titan.foodrecipes.requests.responses.ApiResponse;
 
+import timber.log.Timber;
+
 /**
  *
  * @param <CacheObject> Type for the Resource data. (database cache)
@@ -27,9 +29,12 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
 
     public NetworkBoundResource(AppExecutors appExecutors) {
         this.appExecutors = appExecutors;
+        init();
     }
 
     private void init(){
+
+        Timber.d("init...");
 
         //update livedata for loading status
         results.setValue((Resource<CacheObject>) Resource.loading(null));
@@ -51,6 +56,9 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
                     results.addSource(dbSource, new Observer<CacheObject>() {
                         @Override
                         public void onChanged(CacheObject cacheObject) {
+
+                            Timber.d("Did not fetch...");
+
                             setValue(Resource.success(cacheObject));
                         }
                     });
@@ -70,7 +78,8 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
      */
     private void fetchFromNetwork(final LiveData<CacheObject> dbSource){
 
-        Log.d(TAG, "fetchFromNetwork: called");
+        Timber.d("fetchFromNetwork: called");
+
 
         //update liveData for loading status
         results.addSource(dbSource, new Observer<CacheObject>() {
@@ -96,7 +105,7 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
                  */
 
                 if(requestObjectApiResponse instanceof  ApiResponse.ApiSuccessResponse){
-                    Log.d(TAG, "onChanged: ApiSuccessResponse");
+                    Timber.d("onChanged: ApiSuccessResponse");
 
                     appExecutors.diskIO().execute(new Runnable() {
                         @Override
@@ -119,7 +128,7 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
                     });
                 }
                 else if(requestObjectApiResponse instanceof  ApiResponse.ApiEmptyResponse){
-                    Log.d(TAG, "onChanged: ApiEmptyResponse");
+                    Timber.d("onChanged: ApiEmptyResponse");
 
                     appExecutors.mainThread().execute((new Runnable() {
                         @Override
@@ -134,7 +143,7 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
                     }));
                 }
                 else if(requestObjectApiResponse instanceof  ApiResponse.ApiErrorResponse){
-                    Log.d(TAG, "onChanged: ApiErrorResponse");
+                    Timber.d("onChanged: ApiErrorResponse: " + ((ApiResponse.ApiErrorResponse) requestObjectApiResponse).getErrorMessage());
 
                     results.addSource(dbSource, new Observer<CacheObject>() {
                         @Override
@@ -154,8 +163,10 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
     }
 
     private void setValue(Resource<CacheObject> newValue){
+        Timber.d("setValue: " + newValue);
         if(results.getValue() != newValue){
             results.setValue(newValue);
+            Timber.d("setValue: value set");
         }
     }
 

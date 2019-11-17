@@ -24,6 +24,8 @@ import com.titan.foodrecipes.util.Resource;
 
 import java.util.List;
 
+import timber.log.Timber;
+
 public class RecipeRepository {
 
     private static final String TAG = "RecipeRepository";
@@ -51,12 +53,16 @@ public class RecipeRepository {
         recipeDao = RecipeDatabase.getInstance(context).getRecipeDao();
     }
 
-    public LiveData<Resource<List<Recipe>>> getRecipes(final String query, final int pageNumber){
+    public LiveData<Resource<List<Recipe>>> searchRecipesApi(final String query, final int pageNumber){
         return new NetworkBoundResource<List<Recipe>, RecipeSearchResponse>(AppExecutors.getInstance()){
             @Override
             protected void saveCallResult(@NonNull RecipeSearchResponse item) {
 
+                Timber.d("saveCallResult - item.getRecipes() "+ item.getRecipes());
+
                 if(item.getRecipes() != null){ //recipe list will be null if the api key is expired
+
+                    Timber.d("saveCallResult - number of results %d", item.getRecipes().size());
 
                     Recipe [] recipes = new Recipe[item.getRecipes().size()];
 
@@ -64,7 +70,8 @@ public class RecipeRepository {
                     for(long rowid: recipeDao.insertRecipes((Recipe []) (item.getRecipes().toArray(recipes)))){
 
                         if(rowid == -1){
-                            Log.d(TAG, "saveCallResult: CONFLICT... This recipe is already in the cache");
+
+                            Timber.d("saveCallResult: CONFLICT... This recipe is already in the cache");
 
                             //if the recipe already exists... I dont want to set the ingredients or timestamp b/c (because)
                             //they will be erased
@@ -77,6 +84,9 @@ public class RecipeRepository {
                                     recipes[index].getSocial_rank()
                             );
                         }
+                        else{
+                            Timber.d("saveCallResult: recipe saved " + rowid);
+                        }
                         index++;
                     }
                 }
@@ -84,18 +94,22 @@ public class RecipeRepository {
 
             @Override
             protected boolean shouldFetch(@Nullable List<Recipe> data) {
-                return false;
+                Timber.d("shouldFetch: true");
+                return true; // always query the network since the queries can be anything
             }
 
             @NonNull
             @Override
             protected LiveData<List<Recipe>> loadFromDb() {
+                Timber.d("loadFromDb...");
                 return recipeDao.searchRecipes(query, pageNumber);
             }
 
             @NonNull
             @Override
             protected LiveData<ApiResponse<RecipeSearchResponse>> createCall() {
+
+                Timber.d("createCall...");
                 return ServiceGenerator.getRecipeApi().searchRecipe(Constants.API_KEY, query, String.valueOf(pageNumber));
             }
         }.getAsLiveData();

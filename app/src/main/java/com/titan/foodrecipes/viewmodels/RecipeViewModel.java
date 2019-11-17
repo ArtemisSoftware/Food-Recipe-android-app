@@ -13,21 +13,21 @@ public class RecipeViewModel extends ViewModel {
     private boolean mDidRetrieveRecipe;
 
     public RecipeViewModel() {
-        this.mRecipeRepository = RecipeRepository.getInstance();
+        //--this.mRecipeRepository = RecipeRepository.getInstance();
         mDidRetrieveRecipe = false;
     }
 
     public LiveData<Recipe> getRecipe() {
-        return mRecipeRepository.getRecipe();
+        return null;//mRecipeRepository.getRecipe();
     }
 
     public LiveData<Boolean> isRecipeRequestTimedOut() {
-        return mRecipeRepository.isRecipeRequestTimedOut();
+        return null;//mRecipeRepository.isRecipeRequestTimedOut();
     }
 
     public void searchRecipeById(String recipeId){
         mRecipeId = recipeId;
-        mRecipeRepository.searchRecipeById(recipeId);
+        //--mRecipeRepository.searchRecipeById(recipeId);
     }
 
     public String getRecipeId() {

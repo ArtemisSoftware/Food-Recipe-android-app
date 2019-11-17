@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.util.Arrays;
@@ -35,7 +36,7 @@ public class Recipe implements Parcelable {
     @ColumnInfo(name = "timeStamp")
     private int timeStamp;
 
-
+    @Ignore
     public Recipe() {
 
     }
@@ -50,6 +51,7 @@ public class Recipe implements Parcelable {
         this.timeStamp = timeStamp;
     }
 
+    @Ignore
     protected Recipe(Parcel in) {
         title = in.readString();
         publisher = in.readString();
@@ -136,7 +138,7 @@ public class Recipe implements Parcelable {
         this.social_rank = social_rank;
     }
 
-    public float getTimeStamp() {
+    public int getTimeStamp() {
         return timeStamp;
     }
 
