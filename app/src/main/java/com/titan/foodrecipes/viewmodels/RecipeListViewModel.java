@@ -22,11 +22,17 @@ public class RecipeListViewModel extends AndroidViewModel {
 
     private static final String TAG = "RecipeListViewModel";
 
+    public static final String QUERY_EXHAUSTED = "No more results";
     public enum ViewState {CATEGORIES, RECIPES}
 
     private MutableLiveData<ViewState> viewState;
     private MediatorLiveData<Resource<List<Recipe>>> recipes = new MediatorLiveData<>();
     private RecipeRepository recipeRepository;
+
+    private boolean isQueryExhausted;
+    private boolean isPerformingQuery;
+    private int pageNumber;
+    private String query;
 
     public RecipeListViewModel(@NonNull Application application) {
         super(application);
@@ -51,22 +57,56 @@ public class RecipeListViewModel extends AndroidViewModel {
     }
 
 
+    public int getPageNumber() {
+        return pageNumber;
+    }
+
     public void searchRecipesApi(String query, int pageNumber){
 
-        Timber.d("Search recipes: %s on page %d", query, pageNumber);
+        if(!isPerformingQuery){
+            if(pageNumber == 0){
+                pageNumber = 1;
+            }
+            this.pageNumber = pageNumber;
+            this.query = query;
+            isQueryExhausted = false;
+            executeSearch();
+        }
+    }
 
+    private void executeSearch(){
+
+        isPerformingQuery = true;
+        viewState.setValue(ViewState.RECIPES);
+
+        Timber.d("Search recipes: %s on page %d", query, pageNumber);
         final LiveData<Resource<List<Recipe>>> repositorySource = recipeRepository.searchRecipesApi(query, pageNumber);
 
         recipes.addSource(repositorySource, new Observer<Resource<List<Recipe>>>() {
             @Override
             public void onChanged(Resource<List<Recipe>> listResource) {
 
-                Timber.d("onChanged status: %s ", listResource.status);
-                Timber.d("onChanged message: %s ", listResource.message);
-                Timber.d("onChanged data: "+ listResource.data);
+                if(listResource != null){
+                    recipes.setValue(listResource);
+                    if(listResource.status == Resource.Status.SUCCESS){
+                        isPerformingQuery = false;
 
-                //react to the data
-                recipes.setValue(listResource);
+                        if(listResource.data != null){
+                            if(listResource.data.size() == 0){
+                                Timber.d("onChanged: query is exhausted");
+                                recipes.setValue(new Resource<List<Recipe>>(Resource.Status.ERROR, listResource.data, QUERY_EXHAUSTED));
+                            }
+                        }
+                        recipes.removeSource(repositorySource);
+                    }
+                    else if(listResource.status == Resource.Status.ERROR){
+                        isPerformingQuery = false;
+                        recipes.removeSource(repositorySource);
+                    }
+                }
+                else{
+                    recipes.removeSource(repositorySource);
+                }
             }
         });
     }
