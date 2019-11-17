@@ -14,8 +14,10 @@ import com.titan.foodrecipes.models.Recipe;
 import com.titan.foodrecipes.persistence.RecipeDao;
 import com.titan.foodrecipes.persistence.RecipeDatabase;
 import com.titan.foodrecipes.requests.RecipeApiClient;
+import com.titan.foodrecipes.requests.ServiceGenerator;
 import com.titan.foodrecipes.requests.responses.ApiResponse;
 import com.titan.foodrecipes.requests.responses.RecipeSearchResponse;
+import com.titan.foodrecipes.util.Constants;
 import com.titan.foodrecipes.util.NetworkBoundResource;
 import com.titan.foodrecipes.util.Resource;
 
@@ -67,7 +69,7 @@ public class RecipeRepository {
             @NonNull
             @Override
             protected LiveData<ApiResponse<RecipeSearchResponse>> createCall() {
-                return null;
+                return ServiceGenerator.getRecipeApi().searchRecipe(Constants.API_KEY, query, String.valueOf(pageNumber));
             }
         }.getAsLiveData();
     }
