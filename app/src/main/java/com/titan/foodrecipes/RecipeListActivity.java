@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.titan.foodrecipes.adapters.OnRecipeListener;
 import com.titan.foodrecipes.adapters.RecipeRecyclerAdapter;
@@ -63,8 +64,45 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
                     Log.d(TAG, "onChanged: status: " + listResource.status);
 
                     if(listResource.data != null){
-                        //Testing.printRecipes("data", listResource.data);
-                        mAdapter.setRecipes(listResource.data);
+
+                        switch (listResource.status){
+
+                            case LOADING:{
+
+                                if(mRecipeListViewModel.getPageNumber() > 1){
+                                    mAdapter.displayLoading();
+                                }
+                                else{
+                                    mAdapter.displayOnlyLoading();
+                                }
+                                break;
+                            }
+                            case ERROR:{
+
+                                Timber.e("onChange: cannot refresh the cache");
+                                Timber.e("onChange: ERROR message: " + listResource.message);
+                                Timber.e("onChange: status: ERROR, #recipes: " + listResource.data.size());
+                                mAdapter.hideLoading();
+                                mAdapter.setRecipes(listResource.data);
+                                Toast.makeText(RecipeListActivity.this, listResource.message, Toast.LENGTH_SHORT).show();
+
+                                if(listResource.message.equals(RecipeListViewModel.QUERY_EXHAUSTED)){
+                                    mAdapter.setQueryExhausted();
+                                }
+                                break;
+                            }
+                            case SUCCESS:{
+
+                                Timber.d("onChange: cache has been refreshed.");
+                                Timber.d("onChange: status: SUCCESS, # Recipes: " + listResource.data.size());
+                                mAdapter.hideLoading();
+                                mAdapter.setRecipes(listResource.data);
+                                break;
+                            }
+
+                        }
+
+
                     }
                 }
             }

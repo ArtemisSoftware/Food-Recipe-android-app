@@ -104,8 +104,10 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
                         2)ApiEmptyResponse
                  */
 
+                Timber.d("onChanged : ApiResponse: " + requestObjectApiResponse.toString());
+
                 if(requestObjectApiResponse instanceof  ApiResponse.ApiSuccessResponse){
-                    Timber.d("onChanged: ApiSuccessResponse");
+                    Timber.d("onChanged : ApiSuccessResponse");
 
                     appExecutors.diskIO().execute(new Runnable() {
                         @Override
