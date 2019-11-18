@@ -129,7 +129,7 @@ public class RecipeRepository {
 
                 Timber.d("shouldFetch: recipe: " + data.toString());
 
-                int currentTime = (int) (System.currentTimeMillis() / 100);
+                int currentTime = (int) (System.currentTimeMillis() / 1000);
                 Timber.d("shouldFetch: current time: " + currentTime);
 
                 int lastRefresh = data.getTimeStamp();

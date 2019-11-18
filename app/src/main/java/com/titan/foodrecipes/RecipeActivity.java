@@ -16,7 +16,10 @@ import androidx.lifecycle.ViewModelProviders;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.titan.foodrecipes.models.Recipe;
+import com.titan.foodrecipes.util.Resource;
 import com.titan.foodrecipes.viewmodels.RecipeViewModel;
+
+import timber.log.Timber;
 
 public class RecipeActivity extends BaseActivity {
 
@@ -43,7 +46,7 @@ public class RecipeActivity extends BaseActivity {
         mRecipeViewModel = ViewModelProviders.of(this).get(RecipeViewModel.class);
 
         showProgressBar(true);
-        subscribeObservers();
+
         getIncomingIntent();
 
 
@@ -52,25 +55,53 @@ public class RecipeActivity extends BaseActivity {
     private void getIncomingIntent(){
         if(getIntent().hasExtra("recipe")){
             Recipe recipe = getIntent().getParcelableExtra("recipe");
-            mRecipeViewModel.searchRecipeById(recipe.getRecipe_id());
+            subscribeObservers(recipe.getRecipe_id());
         }
     }
 
-    private void subscribeObservers(){
+    private void subscribeObservers(final String recipeId){
 
-        mRecipeViewModel.getRecipe().observe(this, new Observer<Recipe>() {
+        mRecipeViewModel.searchRecipeApi(recipeId).observe(this, new Observer<Resource<Recipe>>() {
             @Override
-            public void onChanged(Recipe recipe) {
-                if(recipe != null){
+            public void onChanged(Resource<Recipe> recipeResource) {
 
-                    if(recipe.getRecipe_id().equals(mRecipeViewModel.getRecipeId())){
-                        setRecipeProperties(recipe);
-                        mRecipeViewModel.setRetrievedRecipe(true);
+                if(recipeResource != null){
+                    if(recipeResource.data != null){
+
+                        switch (recipeResource.status){
+
+                            case LOADING:{
+
+                                showProgressBar(true);
+                                break;
+                            }
+
+                            case ERROR:{
+
+                                Timber.d("onChanged: status: ERROR, Recipe: "+ recipeResource.data.getTitle());
+                                Timber.d("onChanged: status: ERROR message: "+ recipeResource.message);
+                                showParent();
+                                showProgressBar(false);
+                                break;
+                            }
+
+                            case SUCCESS:{
+
+                                Timber.d("onChanged: cache has been refreshed.");
+                                Timber.d("onChanged: status: SUCCESS, Recipe: "+ recipeResource.data.getTitle());
+                                showParent();
+                                showProgressBar(false);
+                                break;
+                            }
+
+                        }
+
                     }
                 }
             }
         });
 
+        /*
         mRecipeViewModel.isRecipeRequestTimedOut().observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
@@ -80,8 +111,15 @@ public class RecipeActivity extends BaseActivity {
                 }
             }
         });
+        */
     }
 
+    private void showParent(){
+        mScrollView.setVisibility(View.VISIBLE);
+    }
+
+
+/*
     private void setRecipeProperties(Recipe recipe){
         if(recipe != null){
             RequestOptions requestOptions = new RequestOptions().placeholder(R.drawable.ic_launcher_background);
@@ -108,9 +146,6 @@ public class RecipeActivity extends BaseActivity {
         showProgressBar(false);
     }
 
-    private void showParent(){
-        mScrollView.setVisibility(View.VISIBLE);
-    }
 
     private void displayErrorScreen(String errorMessage){
         mRecipeTitle.setText("Error retrieveing recipe...");
@@ -139,4 +174,5 @@ public class RecipeActivity extends BaseActivity {
         showProgressBar(false);
         mRecipeViewModel.setRetrievedRecipe(true);
     }
+    */
 }

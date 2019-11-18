@@ -1,44 +1,26 @@
 package com.titan.foodrecipes.viewmodels;
 
+import android.app.Application;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.titan.foodrecipes.models.Recipe;
 import com.titan.foodrecipes.repository.RecipeRepository;
+import com.titan.foodrecipes.util.Resource;
 
-public class RecipeViewModel extends ViewModel {
+public class RecipeViewModel extends AndroidViewModel {
 
-    private RecipeRepository mRecipeRepository;
-    private String mRecipeId;
-    private boolean mDidRetrieveRecipe;
+    private RecipeRepository recipeRepository;
 
-    public RecipeViewModel() {
-        //--this.mRecipeRepository = RecipeRepository.getInstance();
-        mDidRetrieveRecipe = false;
+    public RecipeViewModel(@NonNull Application application) {
+        super(application);
+        this.recipeRepository = RecipeRepository.getInstance(application);
     }
 
-    public LiveData<Recipe> getRecipe() {
-        return null;//mRecipeRepository.getRecipe();
-    }
-
-    public LiveData<Boolean> isRecipeRequestTimedOut() {
-        return null;//mRecipeRepository.isRecipeRequestTimedOut();
-    }
-
-    public void searchRecipeById(String recipeId){
-        mRecipeId = recipeId;
-        //--mRecipeRepository.searchRecipeById(recipeId);
-    }
-
-    public String getRecipeId() {
-        return mRecipeId;
-    }
-
-    public void setRetrievedRecipe(boolean retrieveRecipe) {
-        mDidRetrieveRecipe = retrieveRecipe;
-    }
-
-    public boolean didRetrieveRecipe() {
-        return mDidRetrieveRecipe;
+    public LiveData<Resource<Recipe>> searchRecipeApi(String recipeId){
+        return recipeRepository.searchRecipesApi(recipeId);
     }
 }
