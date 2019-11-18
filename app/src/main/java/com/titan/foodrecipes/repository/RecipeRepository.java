@@ -17,6 +17,7 @@ import com.titan.foodrecipes.persistence.RecipeDatabase;
 import com.titan.foodrecipes.requests.RecipeApiClient;
 import com.titan.foodrecipes.requests.ServiceGenerator;
 import com.titan.foodrecipes.requests.responses.ApiResponse;
+import com.titan.foodrecipes.requests.responses.RecipeResponse;
 import com.titan.foodrecipes.requests.responses.RecipeSearchResponse;
 import com.titan.foodrecipes.util.Constants;
 import com.titan.foodrecipes.util.NetworkBoundResource;
@@ -33,15 +34,6 @@ public class RecipeRepository {
     private static RecipeRepository instance;
     private RecipeDao recipeDao;
 
-    /*
-    private RecipeApiClient mRecipeApiClient;
-
-    private String mQuery;
-    private int mPageNumber;
-
-    private MutableLiveData<Boolean> mIsQueryExhausted = new MutableLiveData<>();
-    private MediatorLiveData<List<Recipe>> mRecipes = new MediatorLiveData<>();
-*/
     public static RecipeRepository getInstance(Context context){
         if(instance == null){
             instance = new RecipeRepository(context);
@@ -111,6 +103,60 @@ public class RecipeRepository {
 
                 Timber.d("createCall...");
                 return ServiceGenerator.getRecipeApi().searchRecipe(Constants.API_KEY, query, String.valueOf(pageNumber));
+            }
+        }.getAsLiveData();
+    }
+
+
+    public LiveData<Resource<Recipe>> searchRecipesApi (final String recipeId){
+        return new NetworkBoundResource<Recipe, RecipeResponse>(AppExecutors.getInstance()){
+
+            @Override
+            protected void saveCallResult(@NonNull RecipeResponse item) {
+
+                Timber.d("saveCallResult - item.getRecipe() "+ item.getRecipe());
+
+                //will be null if Api key is expired
+                if(item.getRecipe() != null){
+                    item.getRecipe().setTimeStamp((int) (System.currentTimeMillis() / 1000));
+                    recipeDao.insertRecipe((item.getRecipe()));
+                }
+
+            }
+
+            @Override
+            protected boolean shouldFetch(@Nullable Recipe data) {
+
+                Timber.d("shouldFetch: recipe: " + data.toString());
+
+                int currentTime = (int) (System.currentTimeMillis() / 100);
+                Timber.d("shouldFetch: current time: " + currentTime);
+
+                int lastRefresh = data.getTimeStamp();
+                Timber.d("shouldFetch: last refresh: " + lastRefresh);
+                Timber.d("shouldFetch: its been: " + ((currentTime - lastRefresh) /60 /60 /24) + " days since this recipe was refresh. 30 days must elapse before refreshing.");
+
+                if((currentTime - data.getTimeStamp()) >= Constants.RECIPE_REFRESH_TIME){
+                    Timber.d("shouldFetch: SHOULD REFRESH RECIPE?! " + true);
+                    return true;
+                }
+
+                Timber.d("shouldFetch: SHOULD REFRESH RECIPE?! " + false);
+                return false;
+            }
+
+            @NonNull
+            @Override
+            protected LiveData<Recipe> loadFromDb() {
+                Timber.d("loadFromDb...");
+                return recipeDao.getRecipe(recipeId);
+            }
+
+            @NonNull
+            @Override
+            protected LiveData<ApiResponse<RecipeResponse>> createCall() {
+                Timber.d("createCall...");
+                return ServiceGenerator.getRecipeApi().getRecipe(Constants.API_KEY, recipeId);
             }
         }.getAsLiveData();
     }
