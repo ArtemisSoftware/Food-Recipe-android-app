@@ -175,7 +175,7 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public void displaySearchCategories(){
         List<Recipe> categories = new ArrayList<>();
 
-        for(int i = 0; i < Constants.DEFAULT_SEARCH_CATEGORIES.length; i++){
+        for(int i = 0; i < Constants.DEFAULT_SEARCH_CATEGORIES.length; ++i){
             Recipe recipe = new Recipe();
             recipe.setTitle(Constants.DEFAULT_SEARCH_CATEGORIES[i]);
             recipe.setImage_url(Constants.DEFAULT_SEARCH_CATEGORY_IMAGES[i]);

@@ -40,6 +40,8 @@ public class CategoryViewHolder extends RecyclerView.ViewHolder implements View.
 
         Uri path = Uri.parse("android.resource://com.titan.foodrecipes/drawable/" + recipe.getImage_url());
         requestManager.load(path).into(categoryImage);
+
+        categoryTitle.setText(recipe.getTitle());
     }
 
     @Override

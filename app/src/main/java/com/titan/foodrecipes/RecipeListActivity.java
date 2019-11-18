@@ -153,10 +153,11 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
     }
 
     private void initRecyclerView(){
-        mAdapter = new RecipeRecyclerAdapter(this,initGlide());
+
+        mAdapter = new RecipeRecyclerAdapter(this, initGlide());
         VerticalSpacingItemDecorator itemDecorator = new VerticalSpacingItemDecorator(6);
         mRecyclerView.addItemDecoration(itemDecorator);
-
+        mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -172,7 +173,6 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
             }
         });
 
-        mRecyclerView.setAdapter(mAdapter);
     }
 
     private void initSearchView(){
