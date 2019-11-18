@@ -35,6 +35,8 @@ public class RecipeListViewModel extends AndroidViewModel {
     private String query;
     private boolean cancelRequest;
 
+    private long requestStartTime;
+
     public RecipeListViewModel(@NonNull Application application) {
         super(application);
 
@@ -93,6 +95,8 @@ public class RecipeListViewModel extends AndroidViewModel {
 
     private void executeSearch(){
 
+        requestStartTime = System.currentTimeMillis();
+
         cancelRequest = false;
         isPerformingQuery = true;
         viewState.setValue(ViewState.RECIPES);
@@ -108,6 +112,9 @@ public class RecipeListViewModel extends AndroidViewModel {
                     if (listResource != null) {
                         recipes.setValue(listResource);
                         if (listResource.status == Resource.Status.SUCCESS) {
+
+                            Timber.d("onChanged: REQUEST TIME: " + (System.currentTimeMillis() - requestStartTime) / 1000 + " seconds");
+
                             isPerformingQuery = false;
 
                             if (listResource.data != null) {
@@ -118,6 +125,10 @@ public class RecipeListViewModel extends AndroidViewModel {
                             }
                             recipes.removeSource(repositorySource);
                         } else if (listResource.status == Resource.Status.ERROR) {
+
+                            Timber.e("onChanged error: REQUEST TIME: " + (System.currentTimeMillis() - requestStartTime) / 1000 + " seconds");
+
+
                             isPerformingQuery = false;
                             recipes.removeSource(repositorySource);
                         }
