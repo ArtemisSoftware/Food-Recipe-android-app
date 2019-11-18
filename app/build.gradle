@@ -33,6 +33,7 @@ dependencies {
     def glide_version = "4.10.0"
     def circleimageview_version = "3.0.1"
     def room_version = "2.2.0-beta01"
+    def okhttp_version = "3.0.0"
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'
@@ -50,6 +51,10 @@ dependencies {
     implementation "com.google.android.material:material:$material_version"
 
     implementation "com.github.bumptech.glide:glide:$glide_version"
+    compile ("com.github.bumptech.glide:recyclerview-integration:$glide_version") {
+        // Excludes the support library because it's already included by Glide.
+        transitive = false
+    }
 
     implementation "de.hdodenhof:circleimageview:$circleimageview_version"
 
@@ -61,4 +66,7 @@ dependencies {
     annotationProcessor "androidx.room:room-compiler:$room_version"
 
     implementation 'com.jakewharton.timber:timber:4.7.1'
+
+    //okhttp
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
 }

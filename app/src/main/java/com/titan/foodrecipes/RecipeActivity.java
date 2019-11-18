@@ -16,7 +16,10 @@ import androidx.lifecycle.ViewModelProviders;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.titan.foodrecipes.models.Recipe;
+import com.titan.foodrecipes.util.Resource;
 import com.titan.foodrecipes.viewmodels.RecipeViewModel;
+
+import timber.log.Timber;
 
 public class RecipeActivity extends BaseActivity {
 
@@ -43,7 +46,7 @@ public class RecipeActivity extends BaseActivity {
         mRecipeViewModel = ViewModelProviders.of(this).get(RecipeViewModel.class);
 
         showProgressBar(true);
-        subscribeObservers();
+
         getIncomingIntent();
 
 
@@ -52,25 +55,54 @@ public class RecipeActivity extends BaseActivity {
     private void getIncomingIntent(){
         if(getIntent().hasExtra("recipe")){
             Recipe recipe = getIntent().getParcelableExtra("recipe");
-            mRecipeViewModel.searchRecipeById(recipe.getRecipe_id());
+            subscribeObservers(recipe.getRecipe_id());
         }
     }
 
-    private void subscribeObservers(){
+    private void subscribeObservers(final String recipeId){
 
-        mRecipeViewModel.getRecipe().observe(this, new Observer<Recipe>() {
+        mRecipeViewModel.searchRecipeApi(recipeId).observe(this, new Observer<Resource<Recipe>>() {
             @Override
-            public void onChanged(Recipe recipe) {
-                if(recipe != null){
+            public void onChanged(Resource<Recipe> recipeResource) {
 
-                    if(recipe.getRecipe_id().equals(mRecipeViewModel.getRecipeId())){
-                        setRecipeProperties(recipe);
-                        mRecipeViewModel.setRetrievedRecipe(true);
+                if(recipeResource != null){
+                    if(recipeResource.data != null){
+
+                        switch (recipeResource.status){
+
+                            case LOADING:{
+
+                                showProgressBar(true);
+                                break;
+                            }
+
+                            case ERROR:{
+
+                                Timber.d("onChanged: status: ERROR, Recipe: "+ recipeResource.data.getTitle());
+                                Timber.d("onChanged: status: ERROR message: "+ recipeResource.message);
+                                showParent();
+                                showProgressBar(false);
+                                setRecipeProperties(recipeResource.data);
+                                break;
+                            }
+
+                            case SUCCESS:{
+
+                                Timber.d("onChanged: cache has been refreshed.");
+                                Timber.d("onChanged: status: SUCCESS, Recipe: "+ recipeResource.data.getTitle());
+                                showParent();
+                                showProgressBar(false);
+                                setRecipeProperties(recipeResource.data);
+                                break;
+                            }
+                        }
+
                     }
                 }
             }
         });
 
+        /*
         mRecipeViewModel.isRecipeRequestTimedOut().observe(this, new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
@@ -80,11 +112,21 @@ public class RecipeActivity extends BaseActivity {
                 }
             }
         });
+        */
     }
 
+    private void showParent(){
+        mScrollView.setVisibility(View.VISIBLE);
+    }
+
+
+
     private void setRecipeProperties(Recipe recipe){
+
         if(recipe != null){
-            RequestOptions requestOptions = new RequestOptions().placeholder(R.drawable.ic_launcher_background);
+            RequestOptions requestOptions = new RequestOptions()
+                    .placeholder(R.drawable.ic_launcher_background)
+                    .error(R.drawable.white_background);
 
             Glide.with(this)
                     .setDefaultRequestOptions(requestOptions)
@@ -95,23 +137,26 @@ public class RecipeActivity extends BaseActivity {
             mRecipeRank.setText(String.valueOf(Math.round(recipe.getSocial_rank())));
 
             mRecipeIngredientsContainer.removeAllViews();
-            for(String ingredient: recipe.getIngredients()){
+            if(recipe.getIngredients() != null) {
+                for (String ingredient : recipe.getIngredients()) {
+                    TextView textView = new TextView(this);
+                    textView.setText(ingredient);
+                    textView.setTextSize(15);
+                    textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                    mRecipeIngredientsContainer.addView(textView);
+                }
+            }
+            else{
                 TextView textView = new TextView(this);
-                textView.setText(ingredient);
+                textView.setText("Error retrieving ingredients.\nCheck network connection.");
                 textView.setTextSize(15);
                 textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 mRecipeIngredientsContainer.addView(textView);
             }
         }
-
-        showParent();
-        showProgressBar(false);
     }
 
-    private void showParent(){
-        mScrollView.setVisibility(View.VISIBLE);
-    }
-
+/*
     private void displayErrorScreen(String errorMessage){
         mRecipeTitle.setText("Error retrieveing recipe...");
         mRecipeRank.setText("");
@@ -139,4 +184,5 @@ public class RecipeActivity extends BaseActivity {
         showProgressBar(false);
         mRecipeViewModel.setRetrievedRecipe(true);
     }
+    */
 }

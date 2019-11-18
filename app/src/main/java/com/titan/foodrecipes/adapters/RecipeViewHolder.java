@@ -9,8 +9,10 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.ListPreloader;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.titan.foodrecipes.R;
 import com.titan.foodrecipes.models.Recipe;
 
@@ -20,12 +22,14 @@ public class RecipeViewHolder extends RecyclerView.ViewHolder implements View.On
     ImageView image;
     OnRecipeListener onRecipeListener;
     RequestManager requestManager;
+    ViewPreloadSizeProvider viewPreloadSizeProvider;
 
-    public RecipeViewHolder(@NonNull View itemView, OnRecipeListener onRecipeListener, RequestManager requestManager) {
+    public RecipeViewHolder(@NonNull View itemView, OnRecipeListener onRecipeListener, RequestManager requestManager, ViewPreloadSizeProvider viewPreloadSizeProvider) {
         super(itemView);
 
         this.onRecipeListener = onRecipeListener;
         this.requestManager = requestManager;
+        this.viewPreloadSizeProvider = viewPreloadSizeProvider;
 
         title = itemView.findViewById(R.id.recipe_title);
         publisher = itemView.findViewById(R.id.recipe_publisher);
@@ -45,6 +49,8 @@ public class RecipeViewHolder extends RecyclerView.ViewHolder implements View.On
         title.setText(recipe.getTitle());
         publisher.setText(recipe.getPublisher());
         socialScore.setText(String.valueOf(Math.round(recipe.getSocial_rank())));
+
+        viewPreloadSizeProvider.setView(image);
     }
 
     @Override
