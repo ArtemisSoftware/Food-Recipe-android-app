@@ -82,6 +82,7 @@ public class RecipeActivity extends BaseActivity {
                                 Timber.d("onChanged: status: ERROR message: "+ recipeResource.message);
                                 showParent();
                                 showProgressBar(false);
+                                setRecipeProperties(recipeResource.data);
                                 break;
                             }
 
@@ -91,9 +92,9 @@ public class RecipeActivity extends BaseActivity {
                                 Timber.d("onChanged: status: SUCCESS, Recipe: "+ recipeResource.data.getTitle());
                                 showParent();
                                 showProgressBar(false);
+                                setRecipeProperties(recipeResource.data);
                                 break;
                             }
-
                         }
 
                     }
@@ -119,10 +120,13 @@ public class RecipeActivity extends BaseActivity {
     }
 
 
-/*
+
     private void setRecipeProperties(Recipe recipe){
+
         if(recipe != null){
-            RequestOptions requestOptions = new RequestOptions().placeholder(R.drawable.ic_launcher_background);
+            RequestOptions requestOptions = new RequestOptions()
+                    .placeholder(R.drawable.ic_launcher_background)
+                    .error(R.drawable.white_background);
 
             Glide.with(this)
                     .setDefaultRequestOptions(requestOptions)
@@ -133,20 +137,26 @@ public class RecipeActivity extends BaseActivity {
             mRecipeRank.setText(String.valueOf(Math.round(recipe.getSocial_rank())));
 
             mRecipeIngredientsContainer.removeAllViews();
-            for(String ingredient: recipe.getIngredients()){
+            if(recipe.getIngredients() != null) {
+                for (String ingredient : recipe.getIngredients()) {
+                    TextView textView = new TextView(this);
+                    textView.setText(ingredient);
+                    textView.setTextSize(15);
+                    textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                    mRecipeIngredientsContainer.addView(textView);
+                }
+            }
+            else{
                 TextView textView = new TextView(this);
-                textView.setText(ingredient);
+                textView.setText("Error retrieving ingredients.\nCheck network connection.");
                 textView.setTextSize(15);
                 textView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 mRecipeIngredientsContainer.addView(textView);
             }
         }
-
-        showParent();
-        showProgressBar(false);
     }
 
-
+/*
     private void displayErrorScreen(String errorMessage){
         mRecipeTitle.setText("Error retrieveing recipe...");
         mRecipeRank.setText("");
